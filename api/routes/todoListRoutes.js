@@ -19,4 +19,11 @@ app.route('/tasks/:taskId')
 app.route('/read')
 .get(todoList.read_from_student)
 .post(todoList.create_a_student);
+
+app.route('/write')
+.post(todoList.write_a_student);
+
+app.route('/api')
+.get(todoList.check_payload)
+.post(todoList.check_payload2);
 };

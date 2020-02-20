@@ -2,7 +2,54 @@
 
 var mongoose = require('mongoose'),
 Task = mongoose.model('Tasks');
+var payloadChecker = require('payload-validator');
+var expectedPayload = {
+  "name": "",
+  "age": 0,
+  "gender": "",
+  "department": "",
+  "car": ""
+}
 
+exports.check_payload = function (req, res) {
+  res.json({"message" : "GET not supported"});
+  if(req.body){
+    var result = payloadChecker.validator(req.body, expectedPayload, ["name", "age", "gender", "department", "car"], false);
+    if(result.success)
+    {
+      res.json({"message": "Payload is valid"});
+    }
+    else {
+      res.json({"message": result.res.errorMessage});
+    }
+  }
+  else {
+    res.json({"message": "payload not correct"});
+  }
+};
+
+exports.check_payload2 = function (req, res) {
+
+  if(req.body){
+    var result = payloadChecker.validator(req.body, expectedPayload, ["name", "age", "gender", "department", "car"], false);
+    if(result.success)
+    {
+      var fs = require('fs');
+      let data = JSON.stringify(req.body, null, 2);
+      fs.writeFile('././student.json', data, (err) => {
+        if(err) throw err;
+        res.json("Data Written");
+        console.log('Data written');
+      });
+    }
+    else {
+      res.json({"message": result.response.errorMessage});
+    }
+  }
+  else {
+    res.json({"message": "payload not correct"});
+  }
+};
 exports.read_from_student = function (req, res) {
   var fs = require('fs');
   var data;
@@ -11,7 +58,6 @@ exports.read_from_student = function (req, res) {
     data = JSON.parse(data);
     res.json(data);
   });
-
 };
 
 exports.create_a_student = function (req, res) {
@@ -28,6 +74,21 @@ exports.create_a_student = function (req, res) {
     if(err) throw err;
     res.json("Data Written");
     console.log('Data written');
+  });
+};
+
+exports.write_a_student = function (req, res) {
+  var fs = require('fs');
+  var body = '';
+  var filePath = '././student.json';
+  req.on('data', function(data) {
+    body += data;
+  });
+  req.on('end', function () {
+    fs.appendFile(filePath, body, function () {
+      console.log('Data written');
+      res.end();
+    });
   });
 };
 
